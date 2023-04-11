@@ -1,29 +1,32 @@
 """
-MIT License
+BSD 2-Clause License
 
 Copyright (C) 2017-2019, Paul Larsen
-Copyright (C) 2021 Awesome-RJ
-Copyright (c) 2021, Yūki • Black Knights Union, <https://github.com/Awesome-RJ/CutiepiiRobot>
+Copyright (C) 2021-2022, Awesome-RJ, [ https://github.com/Awesome-RJ ]
+Copyright (c) 2021-2022, Yūki • Black Knights Union, [ https://github.com/Awesome-RJ/CutiepiiRobot ]
 
-This file is part of @Cutiepii_Robot (Telegram Bot)
+All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
-furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import asyncio
@@ -37,6 +40,7 @@ from typing import Callable, Coroutine, Dict, List, Tuple, Union
 
 from PIL import Image
 from pyrogram import Client
+from pyrogram.enums import ChatType, ChatMemberStatus
 from pyrogram.errors import FloodWait, MessageNotModified
 from pyrogram.types import Chat, Message, User
 
@@ -69,7 +73,8 @@ def get_readable_time(seconds: int) -> int:
 
     while count < 4:
         count += 1
-        remainder, result = divmod(seconds, 60) if count < 3 else divmod(seconds, 24)
+        remainder, result = divmod(seconds, 60) if count < 3 else divmod(
+            seconds, 24)
         if seconds == 0 and remainder == 0:
             break
         time_list.append(int(result))
@@ -91,13 +96,11 @@ def time_formatter(milliseconds: int) -> str:
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
     days, hours = divmod(hours, 24)
-    tmp = (
-        ((str(days) + " day(s), ") if days else "")
-        + ((str(hours) + " hour(s), ") if hours else "")
-        + ((str(minutes) + " minute(s), ") if minutes else "")
-        + ((str(seconds) + " second(s), ") if seconds else "")
-        + ((str(milliseconds) + " millisecond(s), ") if milliseconds else "")
-    )
+    tmp = (((str(days) + " day(s), ") if days else "") +
+           ((str(hours) + " hour(s), ") if hours else "") +
+           ((str(minutes) + " minute(s), ") if minutes else "") +
+           ((str(seconds) + " second(s), ") if seconds else "") +
+           ((str(milliseconds) + " millisecond(s), ") if milliseconds else ""))
     return tmp[:-2]
 
 
@@ -110,7 +113,7 @@ async def delete_or_pass(message):
 def humanbytes(size):
     if not size:
         return ""
-    power = 2 ** 10
+    power = 2**10
     raised_to_pow = 0
     dict_power_n = {0: "", 1: "Ki", 2: "Mi", 3: "Gi", 4: "Ti"}
     while size > power:
@@ -137,22 +140,21 @@ async def progress(current, total, message, start, type_of_ps, file_name=None):
         )
 
         tmp = progress_str + "{0} of {1}\nETA: {2}".format(
-            humanbytes(current), humanbytes(total), time_formatter(estimated_total_time)
-        )
+            humanbytes(current), humanbytes(total),
+            time_formatter(estimated_total_time))
         if file_name:
             try:
-                await message.edit(
-                    "{}\n**File Name:** `{}`\n{}".format(type_of_ps, file_name, tmp)
-                )
+                await message.edit("{}\n**File Name:** `{}`\n{}".format(
+                    type_of_ps, file_name, tmp))
             except FloodWait as e:
-                await asyncio.sleep(e.x)
+                await asyncio.sleep(e.value)
             except MessageNotModified:
                 pass
         else:
             try:
                 await message.edit("{}\n{}".format(type_of_ps, tmp))
             except FloodWait as e:
-                await asyncio.sleep(e.x)
+                await asyncio.sleep(e.value)
             except MessageNotModified:
                 pass
 
@@ -173,12 +175,12 @@ def get_text(message: Message) -> [None, str]:
 async def iter_chats(client):
     chats = []
     async for dialog in client.iter_dialogs():
-        if dialog.chat.type in ["supergroup", "channel"]:
+        if dialog.chat.type in [ChatType.SUPERGROUP, ChatType.CHANNEL]:
             chats.append(dialog.chat.id)
     return chats
 
 
-async def fetch_audio(client, message):
+async def fetch_audio(message):
     time.time()
     if not message.reply_to_message:
         await message.reply("`Reply To A Video / Audio.`")
@@ -204,20 +206,16 @@ async def fetch_audio(client, message):
 async def edit_or_reply(message, text, parse_mode="md"):
     if message.from_user.id:
         if message.reply_to_message:
-            kk = message.reply_to_message.message_id
-            return await message.reply_text(
-                text, reply_to_message_id=kk, parse_mode=parse_mode
-            )
+            kk = message.reply_to_message.id
+            return await message.reply_text(text, reply_to_message_id=kk, parse_mode=parse_mode)
         return await message.reply_text(text, parse_mode=parse_mode)
     return await message.edit(text, parse_mode=parse_mode)
-
 
 async def runcmd(cmd: str) -> Tuple[str, str, int, int]:
     """ run command in terminal """
     args = shlex.split(cmd)
     process = await asyncio.create_subprocess_exec(
-        *args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-    )
+        *args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     stdout, stderr = await process.communicate()
     return (
         stdout.decode("utf-8", "replace").strip(),
@@ -230,13 +228,10 @@ async def runcmd(cmd: str) -> Tuple[str, str, int, int]:
 async def convert_to_image(message, client) -> [None, str]:
     """Convert Most Media Formats To Raw Image"""
     final_path = None
-    if not (
-        message.reply_to_message.photo
-        or message.reply_to_message.sticker
-        or message.reply_to_message.media
-        or message.reply_to_message.animation
-        or message.reply_to_message.audio
-    ):
+    if not (message.reply_to_message.photo or message.reply_to_message.sticker
+            or message.reply_to_message.media
+            or message.reply_to_message.animation
+            or message.reply_to_message.audio):
         return None
     if message.reply_to_message.photo:
         final_path = await message.reply_to_message.download()
@@ -259,7 +254,8 @@ async def convert_to_image(message, client) -> [None, str]:
     elif message.reply_to_message.video or message.reply_to_message.animation:
         final_path = "fetched_thumb.png"
         vid_path = await client.download_media(message.reply_to_message)
-        await runcmd(f"ffmpeg -i {vid_path} -filter:v scale=500:500 -an {final_path}")
+        await runcmd(
+            f"ffmpeg -i {vid_path} -filter:v scale=500:500 -an {final_path}")
     return final_path
 
 
@@ -306,16 +302,15 @@ async def get_administrators(chat: Chat) -> List[User]:
         return _get
     set(
         chat.id,
-        (
-            member.user
-            for member in await chat.get_member(filter="administrators")
-        ),
+        (member.user
+         for member in await chat.get_member(filter="administrators")),
     )
 
     return await get_administrators(chat)
 
 
 def admins_only(func: Callable) -> Coroutine:
+
     async def wrapper(client: Client, message: Message):
         if message.from_user.id == OWNER_ID:
             return await func(client, message)
@@ -329,6 +324,7 @@ def admins_only(func: Callable) -> Coroutine:
 
 # @Mr_Dark_Prince
 def capture_err(func):
+
     @wraps(func)
     async def capture(client, message, *args, **kwargs):
         try:
@@ -346,8 +342,7 @@ def capture_err(func):
                     0 if not message.chat else message.chat.id,
                     message.text or message.caption,
                     "".join(errors),
-                ),
-            )
+                ), )
             for x in error_feedback:
                 await pgram.send_message(SUPPORT_CHAT, x)
             raise err
@@ -358,9 +353,12 @@ def capture_err(func):
 # Special credits to TheHamkerCat
 
 
-async def member_permissions(chat_id, user_id):
+async def member_permissions(chat_id: int, user_id: int):
     perms = []
-    member = await pgram.get_chat_member(chat_id, user_id)
+    try:
+        member = (await pgram.get_chat_member(chat_id, user_id)).privileges
+    except Exception:
+        return []
     if member.can_post_messages:
         perms.append("can_post_messages")
     if member.can_edit_messages:
@@ -377,4 +375,6 @@ async def member_permissions(chat_id, user_id):
         perms.append("can_invite_users")
     if member.can_pin_messages:
         perms.append("can_pin_messages")
+    if member.can_manage_video_chats:
+        perms.append("can_manage_video_chats")
     return perms

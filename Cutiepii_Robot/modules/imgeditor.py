@@ -1,31 +1,34 @@
 """
-MIT License
+BSD 2-Clause License
 
 Copyright (C) 2017-2019, Paul Larsen
-Copyright (C) 2021 Awesome-RJ
-Copyright (c) 2021, Yūki • Black Knights Union, <https://github.com/Awesome-RJ/CutiepiiRobot>
+Copyright (C) 2021-2022, Awesome-RJ, [ https://github.com/Awesome-RJ ]
+Copyright (c) 2021-2022, Yūki • Black Knights Union, [ https://github.com/Awesome-RJ/CutiepiiRobot ]
 
-This file is part of @Cutiepii_Robot (Telegram Bot)
+All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
-furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-
+"""
 from pyrogram import filters
 from pyrogram.types import (
     CallbackQuery,
@@ -33,65 +36,40 @@ from pyrogram.types import (
     InlineKeyboardMarkup,
     Message,
 )
-
-from Cutiepii_Robot import BOT_NAME
+from Cutiepii_Robot import CUTIEPII_PTB, LOGGER
 
 # By @TroJanzHEX
-from Cutiepii_Robot.utils.resources.ImageEditor.edit_1 import (  # pylint:disable=import-error
-    black_white,
-    box_blur,
-    bright,
-    g_blur,
-    mix,
-    normal_blur,
+from Cutiepii_Robot.utils.resources.ImageEditor.edit_1 import (
+    black_white, box_blur, bright, g_blur, mix, normal_blur,
 )
-from Cutiepii_Robot.utils.resources.ImageEditor.edit_2 import (  # pylint:disable=import-error
-    cartoon,
-    circle_with_bg,
-    circle_without_bg,
-    contrast,
-    edge_curved,
-    pencil,
-    sepia_mode,
-    sticker,
+from Cutiepii_Robot.utils.resources.ImageEditor.edit_2 import (
+    cartoon, circle_with_bg, circle_without_bg, contrast, edge_curved, pencil,
+    sepia_mode, sticker,
 )
-from Cutiepii_Robot.utils.resources.ImageEditor.edit_3 import (  # pylint:disable=import-error
-    black_border,
-    blue_border,
-    green_border,
-    red_border,
+from Cutiepii_Robot.utils.resources.ImageEditor.edit_3 import (
+    black_border, blue_border, green_border, red_border,
 )
-from Cutiepii_Robot.utils.resources.ImageEditor.edit_4 import (  # pylint:disable=import-error
-    inverted,
-    removebg_plain,
-    removebg_sticker,
-    removebg_white,
-    rotate_90,
-    rotate_180,
-    rotate_270,
-    round_sticker,
+from Cutiepii_Robot.utils.resources.ImageEditor.edit_4 import (
+    inverted, removebg_plain, removebg_sticker, removebg_white, rotate_90,
+    rotate_180, rotate_270, round_sticker,
 )
-from Cutiepii_Robot.utils.resources.ImageEditor.edit_5 import (  # pylint:disable=import-error
-    normalglitch_1,
-    normalglitch_2,
-    normalglitch_3,
-    normalglitch_4,
-    normalglitch_5,
-    scanlineglitch_1,
-    scanlineglitch_2,
-    scanlineglitch_3,
-    scanlineglitch_4,
-    scanlineglitch_5,
+from Cutiepii_Robot.utils.resources.ImageEditor.edit_5 import (
+    normalglitch_1, normalglitch_2, normalglitch_3, normalglitch_4,
+    normalglitch_5, scanlineglitch_1, scanlineglitch_2, scanlineglitch_3,
+    scanlineglitch_4, scanlineglitch_5,
 )
 from Cutiepii_Robot import pgram
 
 lel = 00000000
+
+
 # pylint:disable=import-error
 @pgram.on_message(filters.command(["edit", "editor"]))
 async def photo(client: pgram, message: Message):
     try:
         if not message.reply_to_message.photo:
-            await client.send_message(message.chat.id, "Reply to an image man!ㅤㅤ")
+            await client.send_message(message.chat.id,
+                                      "Reply to an image man!ㅤㅤ")
             return
     except:
         return
@@ -104,46 +82,53 @@ async def photo(client: pgram, message: Message):
         await client.send_message(
             chat_id=message.chat.id,
             text="Select your required mode from below!ㅤㅤ",
-            reply_markup=InlineKeyboardMarkup(
+            reply_markup=InlineKeyboardMarkup([
                 [
-                    [
-                        InlineKeyboardButton(text="💡 BRIGHT", callback_data="bright"),
-                        InlineKeyboardButton(text="🖼 MIXED", callback_data="mix"),
-                        InlineKeyboardButton(text="🔳 B&W", callback_data="b|w"),
-                    ],
-                    [
-                        InlineKeyboardButton(text="🟡 CIRCLE", callback_data="circle"),
-                        InlineKeyboardButton(text="🩸 BLUR", callback_data="blur"),
-                        InlineKeyboardButton(text="🌌 BORDER", callback_data="border"),
-                    ],
-                    [
-                        InlineKeyboardButton(text="🎉 STICKER", callback_data="stick"),
-                        InlineKeyboardButton(text="↩️ ROTATE", callback_data="rotate"),
-                        InlineKeyboardButton(
-                            text="🔦 CONTRAST", callback_data="contrast"
-                        ),
-                    ],
-                    [
-                        InlineKeyboardButton(text="🌇 SEPIA", callback_data="sepia"),
-                        InlineKeyboardButton(text="✏️ PENCIL", callback_data="pencil"),
-                        InlineKeyboardButton(text="🐶 CARTOON", callback_data="cartoon"),
-                    ],
-                    [
-                        InlineKeyboardButton(text="🔄 INVERT", callback_data="inverted"),
-                        InlineKeyboardButton(text="🔮 GLITCH", callback_data="glitch"),
-                        InlineKeyboardButton(
-                            text="✂️ REMOVE BG", callback_data="removebg"
-                        ),
-                    ],
-                    [
-                        InlineKeyboardButton(text="❌ CLOSE", callback_data="close_e"),
-                    ],
-                ]
-            ),
-            reply_to_message_id=message.reply_to_message.message_id,
+                    InlineKeyboardButton(text="💡 BRIGHT",
+                                         callback_data="bright"),
+                    InlineKeyboardButton(text="🖼 MIXED", callback_data="mix"),
+                    InlineKeyboardButton(text="🔳 B&W", callback_data="b|w"),
+                ],
+                [
+                    InlineKeyboardButton(text="🟡 CIRCLE",
+                                         callback_data="circle"),
+                    InlineKeyboardButton(text="🩸 BLUR", callback_data="blur"),
+                    InlineKeyboardButton(text="🌌 BORDER",
+                                         callback_data="border"),
+                ],
+                [
+                    InlineKeyboardButton(text="🎉 STICKER",
+                                         callback_data="stick"),
+                    InlineKeyboardButton(text="↩️ ROTATE",
+                                         callback_data="rotate"),
+                    InlineKeyboardButton(text="🔦 CONTRAST",
+                                         callback_data="contrast"),
+                ],
+                [
+                    InlineKeyboardButton(text="🌇 SEPIA",
+                                         callback_data="sepia"),
+                    InlineKeyboardButton(text="✏️ PENCIL",
+                                         callback_data="pencil"),
+                    InlineKeyboardButton(text="🐶 CARTOON",
+                                         callback_data="cartoon"),
+                ],
+                [
+                    InlineKeyboardButton(text="🔄 INVERT",
+                                         callback_data="inverted"),
+                    InlineKeyboardButton(text="🔮 GLITCH",
+                                         callback_data="glitch"),
+                    InlineKeyboardButton(text="✂️ REMOVE BG",
+                                         callback_data="removebg"),
+                ],
+                [
+                    InlineKeyboardButton(text="❌ CLOSE",
+                                         callback_data="close_e"),
+                ],
+            ]),
+            reply_to_message_id=message.reply_to_message.id,
         )
     except Exception as e:
-        print("photomarkup error - " + str(e))
+        LOGGER.debug(f"photomarkup error - {str(e)}")
         if "USER_IS_BLOCKED" in str(e):
             return
         try:
@@ -159,175 +144,139 @@ async def cb_handler(client: pgram, query: CallbackQuery):
         if query.data == "removebg":
             await query.message.edit_text(
                 "**Select required mode**ㅤㅤㅤㅤ",
-                reply_markup=InlineKeyboardMarkup(
+                reply_markup=InlineKeyboardMarkup([
                     [
-                        [
-                            InlineKeyboardButton(
-                                text="WITH WHITE BG", callback_data="rmbgwhite"
-                            ),
-                            InlineKeyboardButton(
-                                text="WITHOUT BG", callback_data="rmbgplain"
-                            ),
-                        ],
-                        [
-                            InlineKeyboardButton(
-                                text="STICKER", callback_data="rmbgsticker"
-                            )
-                        ],
-                    ]
-                ),
+                        InlineKeyboardButton(text="WITH WHITE BG",
+                                             callback_data="rmbgwhite"),
+                        InlineKeyboardButton(text="WITHOUT BG",
+                                             callback_data="rmbgplain"),
+                    ],
+                    [
+                        InlineKeyboardButton(text="STICKER",
+                                             callback_data="rmbgsticker")
+                    ],
+                ]),
             )
         elif query.data == "stick":
             await query.message.edit(
                 "**Select a Type**",
-                reply_markup=InlineKeyboardMarkup(
+                reply_markup=InlineKeyboardMarkup([
                     [
-                        [
-                            InlineKeyboardButton(text="Normal", callback_data="stkr"),
-                            InlineKeyboardButton(
-                                text="Edge Curved", callback_data="cur_ved"
-                            ),
-                        ],
-                        [
-                            InlineKeyboardButton(
-                                text="Circle", callback_data="circle_sticker"
-                            )
-                        ],
-                    ]
-                ),
+                        InlineKeyboardButton(text="Normal",
+                                             callback_data="stkr"),
+                        InlineKeyboardButton(text="Edge Curved",
+                                             callback_data="cur_ved"),
+                    ],
+                    [
+                        InlineKeyboardButton(text="Circle",
+                                             callback_data="circle_sticker")
+                    ],
+                ]),
             )
         elif query.data == "rotate":
             await query.message.edit_text(
                 "**Select the Degree**",
-                reply_markup=InlineKeyboardMarkup(
+                reply_markup=InlineKeyboardMarkup([
                     [
-                        [
-                            InlineKeyboardButton(text="180", callback_data="180"),
-                            InlineKeyboardButton(text="90", callback_data="90"),
-                        ],
-                        [InlineKeyboardButton(text="270", callback_data="270")],
-                    ]
-                ),
+                        InlineKeyboardButton(text="180", callback_data="180"),
+                        InlineKeyboardButton(text="90", callback_data="90"),
+                    ],
+                    [InlineKeyboardButton(text="270", callback_data="270")],
+                ]),
             )
 
         elif query.data == "glitch":
             await query.message.edit_text(
                 "**Select required mode**ㅤㅤㅤㅤ",
-                reply_markup=InlineKeyboardMarkup(
-                    [
-                        [
-                            InlineKeyboardButton(
-                                text="NORMAL", callback_data="normalglitch"
-                            ),
-                            InlineKeyboardButton(
-                                text="SCAN LINES", callback_data="scanlineglitch"
-                            ),
-                        ]
-                    ]
-                ),
+                reply_markup=InlineKeyboardMarkup([[
+                    InlineKeyboardButton(text="NORMAL",
+                                         callback_data="normalglitch"),
+                    InlineKeyboardButton(text="SCAN LINES",
+                                         callback_data="scanlineglitch"),
+                ]]),
             )
         elif query.data == "normalglitch":
             await query.message.edit_text(
                 "**Select Glitch power level**",
-                reply_markup=InlineKeyboardMarkup(
+                reply_markup=InlineKeyboardMarkup([
                     [
-                        [
-                            InlineKeyboardButton(
-                                text="1", callback_data="normalglitch1"
-                            ),
-                            InlineKeyboardButton(
-                                text="2", callback_data="normalglitch2"
-                            ),
-                            InlineKeyboardButton(
-                                text="3", callback_data="normalglitch3"
-                            ),
-                        ],
-                        [
-                            InlineKeyboardButton(
-                                text="4", callback_data="normalglitch4"
-                            ),
-                            InlineKeyboardButton(
-                                text="5", callback_data="normalglitch5"
-                            ),
-                        ],
-                    ]
-                ),
+                        InlineKeyboardButton(text="1",
+                                             callback_data="normalglitch1"),
+                        InlineKeyboardButton(text="2",
+                                             callback_data="normalglitch2"),
+                        InlineKeyboardButton(text="3",
+                                             callback_data="normalglitch3"),
+                    ],
+                    [
+                        InlineKeyboardButton(text="4",
+                                             callback_data="normalglitch4"),
+                        InlineKeyboardButton(text="5",
+                                             callback_data="normalglitch5"),
+                    ],
+                ]),
             )
         elif query.data == "scanlineglitch":
             await query.message.edit_text(
                 "**Select Glitch power level**",
-                reply_markup=InlineKeyboardMarkup(
+                reply_markup=InlineKeyboardMarkup([
                     [
-                        [
-                            InlineKeyboardButton(
-                                text="1", callback_data="scanlineglitch1"
-                            ),
-                            InlineKeyboardButton(
-                                text="2", callback_data="scanlineglitch2"
-                            ),
-                            InlineKeyboardButton(
-                                text="3", callback_data="scanlineglitch3"
-                            ),
-                        ],
-                        [
-                            InlineKeyboardButton(
-                                text="4", callback_data="scanlineglitch4"
-                            ),
-                            InlineKeyboardButton(
-                                text="5", callback_data="scanlineglitch5"
-                            ),
-                        ],
-                    ]
-                ),
+                        InlineKeyboardButton(text="1",
+                                             callback_data="scanlineglitch1"),
+                        InlineKeyboardButton(text="2",
+                                             callback_data="scanlineglitch2"),
+                        InlineKeyboardButton(text="3",
+                                             callback_data="scanlineglitch3"),
+                    ],
+                    [
+                        InlineKeyboardButton(text="4",
+                                             callback_data="scanlineglitch4"),
+                        InlineKeyboardButton(text="5",
+                                             callback_data="scanlineglitch5"),
+                    ],
+                ]),
             )
         elif query.data == "blur":
             await query.message.edit(
                 "**Select a Type**",
-                reply_markup=InlineKeyboardMarkup(
+                reply_markup=InlineKeyboardMarkup([
                     [
-                        [
-                            InlineKeyboardButton(text="box", callback_data="box"),
-                            InlineKeyboardButton(text="normal", callback_data="normal"),
-                        ],
-                        [InlineKeyboardButton(text="Gaussian", callback_data="gas")],
-                    ]
-                ),
+                        InlineKeyboardButton(text="box", callback_data="box"),
+                        InlineKeyboardButton(text="normal",
+                                             callback_data="normal"),
+                    ],
+                    [
+                        InlineKeyboardButton(text="Gaussian",
+                                             callback_data="gas")
+                    ],
+                ]),
             )
         elif query.data == "circle":
             await query.message.edit_text(
                 "**Select required mode**",
-                reply_markup=InlineKeyboardMarkup(
-                    [
-                        [
-                            InlineKeyboardButton(
-                                text="WITH BG", callback_data="circlewithbg"
-                            ),
-                            InlineKeyboardButton(
-                                text="WITHOUT BG", callback_data="circlewithoutbg"
-                            ),
-                        ]
-                    ]
-                ),
+                reply_markup=InlineKeyboardMarkup([[
+                    InlineKeyboardButton(text="WITH BG",
+                                         callback_data="circlewithbg"),
+                    InlineKeyboardButton(text="WITHOUT BG",
+                                         callback_data="circlewithoutbg"),
+                ]]),
             )
         elif query.data == "border":
             await query.message.edit(
                 "**Select Border**",
-                reply_markup=InlineKeyboardMarkup(
+                reply_markup=InlineKeyboardMarkup([
                     [
-                        [
-                            InlineKeyboardButton(text="🔴 RED 🔴", callback_data="red"),
-                            InlineKeyboardButton(
-                                text="🟢 Green 🟢", callback_data="green"
-                            ),
-                        ],
-                        [
-                            InlineKeyboardButton(
-                                text="⚫ Black ⚫", callback_data="black"
-                            ),
-                            InlineKeyboardButton(text="🔵 Blue 🔵", callback_data="blue"),
-                        ],
-                    ]
-                ),
+                        InlineKeyboardButton(text="🔴 RED 🔴",
+                                             callback_data="red"),
+                        InlineKeyboardButton(text="🟢 Green 🟢",
+                                             callback_data="green"),
+                    ],
+                    [
+                        InlineKeyboardButton(text="⚫ Black ⚫",
+                                             callback_data="black"),
+                        InlineKeyboardButton(text="🔵 Blue 🔵",
+                                             callback_data="blue"),
+                    ],
+                ]),
             )
 
         elif query.data == "bright":
@@ -474,12 +423,13 @@ async def cb_handler(client: pgram, query: CallbackQuery):
 
         elif query.data == "rmbgsticker":
             await removebg_sticker(client, query.message)
-
-
+"""
+"""
 __mod_name__ = "Image Editor"
-__help__ = f"""
-{BOT_NAME} have some advanced image editing tools inbuilt
+__help__ = f
+Cutiepii Robot 愛 have some advanced image editing tools inbuilt
 Bright, Circle, RemBG, Blur, Border, Flip, Glitch, Sticker maker and more
-  ➢ `/edit [reply to image]`*:* Open the image editor
-  ➢ `/rmbg [REPLY]`*:* Revove BG of replied image/sticker.
+➛ /edit [reply to image]*:* Open the image editor
+➛ /rmbg [REPLY]*:* Revove BG of replied image/sticker.
+
 """

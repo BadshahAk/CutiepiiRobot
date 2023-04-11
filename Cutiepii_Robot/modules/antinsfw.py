@@ -1,35 +1,38 @@
 """
-MIT License
+BSD 2-Clause License
 
 Copyright (C) 2017-2019, Paul Larsen
-Copyright (C) 2021 Awesome-RJ
-Copyright (c) 2021, Yūki • Black Knights Union, <https://github.com/Awesome-RJ/CutiepiiRobot>
+Copyright (C) 2021-2022, Awesome-RJ, [ https://github.com/Awesome-RJ ]
+Copyright (c) 2021-2022, Yūki • Black Knights Union, [ https://github.com/Awesome-RJ/CutiepiiRobot ]
 
-This file is part of @Cutiepii_Robot (Telegram Bot)
+All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
-furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 from os import remove
 from pyrogram import filters
 
-from Cutiepii_Robot import DRAGONS, BOT_USERNAME, arq, pgram
+from Cutiepii_Robot import SUDO_USERS, arq, pgram
 from Cutiepii_Robot.utils.errors import capture_err
 from Cutiepii_Robot.utils.permissions import adminsOnly
 from Cutiepii_Robot.modules.mongo.nsfw_mongo import is_nsfw_on, nsfw_off, nsfw_on
@@ -69,13 +72,11 @@ async def get_file_id_from_message(message):
 
 
 @pgram.on_message(
-    (
-        filters.document
-        | filters.photo
-        | filters.sticker
-        | filters.animation
-        | filters.video
-    )
+    (filters.document
+     | filters.photo
+     | filters.sticker
+     | filters.animation
+     | filters.video)
     & ~filters.private,
     group=8,
 )
@@ -98,7 +99,7 @@ async def detect_nsfw(_, message):
     results = results.result
     remove(file)
     nsfw = results.is_nsfw
-    if message.from_user.id in DRAGONS:
+    if message.from_user.id in SUDO_USERS:
         return
     if not nsfw:
         return
@@ -106,8 +107,7 @@ async def detect_nsfw(_, message):
         await message.delete()
     except Exception:
         return
-    await message.reply_text(
-        f"""
+    await message.reply_text(f"""
 **NSFW Image Detected & Deleted Successfully!
 ————————————————————**
 **User:** {message.from_user.mention} [`{message.from_user.id}`]
@@ -118,29 +118,21 @@ async def detect_nsfw(_, message):
 **Drawings:** `{results.drawings} %`
 **————————————————————**
 __Powered by__@Yuki_Network.
-"""
-    )
+""")
 
 
-@pgram.on_message(filters.command(["nsfwscan", f"nsfwscan@{BOT_USERNAME}"]))
+@pgram.on_message(filters.command(["nsfwscan", "nsfwscan@Cutiepii_Robot"]))
 @capture_err
 async def nsfw_scan_command(_, message):
     if not message.reply_to_message:
         await message.reply_text(
-            "Reply to an image/document/sticker/animation to scan it."
-        )
+            "Reply to an image/document/sticker/animation to scan it.")
         return
     reply = message.reply_to_message
-    if (
-        not reply.document
-        and not reply.photo
-        and not reply.sticker
-        and not reply.animation
-        and not reply.video
-    ):
+    if (not reply.document and not reply.photo and not reply.sticker
+            and not reply.animation and not reply.video):
         await message.reply_text(
-            "Reply to an image/document/sticker/animation to scan it."
-        )
+            "Reply to an image/document/sticker/animation to scan it.")
         return
     m = await message.reply_text("Scanning")
     file_id = await get_file_id_from_message(reply)
@@ -155,25 +147,23 @@ async def nsfw_scan_command(_, message):
     if not results.ok:
         return await m.edit(results.result)
     results = results.result
-    await m.edit(
-        f"""
+    await m.edit(f"""
 **Neutral:** `{results.neutral} %`
 **Porn:** `{results.porn} %`
 **Hentai:** `{results.hentai} %`
 **Sexy:** `{results.sexy} %`
 **Drawings:** `{results.drawings} %`
 **NSFW:** `{results.is_nsfw}`
-"""
-    )
+""")
 
 
-@pgram.on_message(filters.command(["antinsfw", f"antinsfw@{BOT_USERNAME}"]) & ~filters.private)
+@pgram.on_message(
+    filters.command(["antinsfw", "antinsfw@Cutiepii_Robot"]) & ~filters.private
+)
 @adminsOnly("can_change_info")
 async def nsfw_enable_disable(_, message):
     if len(message.command) != 2:
-        await message.reply_text(
-            "Usage: /antinsfw [on/off]"
-        )
+        await message.reply_text("Usage: /antinsfw [on/off]")
         return
     status = message.text.split(None, 1)[1].strip()
     status = status.lower()
@@ -187,6 +177,4 @@ async def nsfw_enable_disable(_, message):
         await nsfw_off(chat_id)
         await message.reply_text("Disabled AntiNSFW System.")
     else:
-        await message.reply_text(
-            "Unknown Suffix, Use /antinsfw [on/off]"
-        )
+        await message.reply_text("Unknown Suffix, Use /antinsfw [on/off]")

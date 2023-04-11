@@ -1,29 +1,32 @@
 """
-MIT License
+BSD 2-Clause License
 
 Copyright (C) 2017-2019, Paul Larsen
-Copyright (C) 2021 Awesome-RJ
-Copyright (c) 2021, Yūki • Black Knights Union, <https://github.com/Awesome-RJ/CutiepiiRobot>
+Copyright (C) 2021-2022, Awesome-RJ, [ https://github.com/Awesome-RJ ]
+Copyright (c) 2021-2022, Yūki • Black Knights Union, [ https://github.com/Awesome-RJ/CutiepiiRobot ]
 
-This file is part of @Cutiepii_Robot (Telegram Bot)
+All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
-furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import requests
@@ -35,13 +38,12 @@ import re
 import string
 import subprocess
 import textwrap
+import contextlib
 import nltk
 
 from random import randint, randrange, uniform
 from cowpy import cow
 from PIL import Image, ImageDraw, ImageEnhance, ImageFont, ImageOps
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from telethon.tl.types import DocumentAttributeFilename, InputMessagesFilterDocument, InputMediaDice
 from telethon import events
 from zalgo_text import zalgo
@@ -51,7 +53,7 @@ from pyrogram import filters
 from Cutiepii_Robot.utils.errors import capture_err
 from Cutiepii_Robot.utils.carbon import make_carbon
 from Cutiepii_Robot.events import register
-from Cutiepii_Robot import telethn, ubot, pgram, TEMP_DOWNLOAD_DIRECTORY, SUPPORT_CHAT, GOOGLE_CHROME_BIN, CHROME_DRIVER
+from Cutiepii_Robot import telethn, ubot, pgram, TEMP_DOWNLOAD_DIRECTORY, SUPPORT_CHAT, LOGGER
 
 nltk.download("punkt")
 nltk.download("averaged_perceptron_tagger")
@@ -69,7 +71,8 @@ async def _(event):
     stuber = await event.reply(
         f"Ok ! Fectching {infintyvar} From inshortsapi Server And Sending To News Channel",
     )
-    await stuber.edit("All News Has Been Sucessfully fetched, sendning to you.")
+    await stuber.edit("All News Has Been Sucessfully fetched, sendning to you."
+                      )
     starknews = requests.get(main_url).json()
     for item in starknews["data"]:
         sedlyf = item["content"]
@@ -81,31 +84,31 @@ async def _(event):
         sed1 = img
         sedm = f"**Title : {titles}** \n{sedlyf} \nDate : {dateis} \nAuthor : {writter} \nReadMore : {readthis}"
         await pgram.send_photo(event.chat_id, sed1, caption=sedm)
-        
+
 
 @register(pattern="^/ball(?: |$)(.*)")
 async def _(event):
     if event.fwd_from:
         return
-    input_str = event.pattern_match.group(1)
+    inputstr = event.pattern_match.group(1)
     r = await event.reply(file=InputMediaDice("🏀"))
-    input_int = int(input_str)
+    input_int = int(inputstr)
     if input_int > 5:
         await event.reply("hey nigga use number 1 to 6 only")
-    
+
     else:
-        try:
+        with contextlib.suppress(BaseException):
             required_number = input_int
             while r.media.value != required_number:
                 await r.delete()
                 r = await event.reply(file=InputMediaDice("🏀"))
-        except BaseException:
-            pass
+
 
 @register(pattern="^/asupan ?(.*)")
 async def asupan(event):
     try:
-        resp = requests.get("https://tede-api.herokuapp.com/api/asupan/ptl").json()
+        resp = requests.get(
+            "https://tede-api.herokuapp.com/api/asupan/ptl").json()
         asupannya = f"{resp['url']}"
         return await telethn.send_file(event.chat_id, asupannya)
     except Exception:
@@ -115,7 +118,8 @@ async def asupan(event):
 @register(pattern="^/wibu ?(.*)")
 async def wibu(event):
     try:
-        resp = requests.get("https://tede-api.herokuapp.com/api/asupan/wibu").json()
+        resp = requests.get(
+            "https://tede-api.herokuapp.com/api/asupan/wibu").json()
         wibunya = f"{resp['url']}"
         return await telethn.send_file(event.chat_id, wibunya)
     except Exception:
@@ -131,12 +135,12 @@ async def chika(event):
     except Exception:
         await event.reply(f"Error Report @{SUPPORT_CHAT}")
 
-        
+
 @register(pattern="^/truth ?(.*)")
 async def _(td):
     try:
-        resp = requests.get("https://api-tede.herokuapp.com/api/truth-en").json()
-        results = f"{resp['message']}"
+        resp = requests.get("https://api.safone.tech/truth").json()
+        results = f"{resp['truth']}"
         return await td.reply(results)
     except Exception:
         await td.reply(f"Error Report @{SUPPORT_CHAT}")
@@ -145,8 +149,58 @@ async def _(td):
 @register(pattern="^/dare ?(.*)")
 async def _(dr):
     try:
-        resp = requests.get("https://api-tede.herokuapp.com/api/dare-en").json()
-        results = f"{resp['message']}"
+        resp = requests.get("https://api.safone.tech/dare").json()
+        results = f"{resp['dare']}"
+        return await dr.reply(results)
+    except Exception:
+        await dr.reply(f"Error Report @{SUPPORT_CHAT}")
+
+
+@register(pattern="^/fact ?(.*)")
+async def _(dr):
+    try:
+        resp = requests.get("https://api.safone.tech/fact").json()
+        results = f"{resp['fact']}"
+        return await dr.reply(results)
+    except Exception:
+        await dr.reply(f"Error Report @{SUPPORT_CHAT}")
+
+
+@register(pattern="^/quotes ?(.*)")
+async def _(dr):
+    try:
+        resp = requests.get("https://api.safone.tech/quote").json()
+        results = f"{resp['quote']}"
+        return await dr.reply(results)
+    except Exception:
+        await dr.reply(f"Error Report @{SUPPORT_CHAT}")
+
+
+@register(pattern="^/joke ?(.*)")
+async def _(dr):
+    try:
+        resp = requests.get("https://api.safone.tech/joke").json()
+        results = f"{resp['joke']}"
+        return await dr.reply(results)
+    except Exception:
+        await dr.reply(f"Error Report @{SUPPORT_CHAT}")
+
+
+@register(pattern="^/bully ?(.*)")
+async def _(dr):
+    try:
+        resp = requests.get("https://api.safone.tech/bully").json()
+        results = f"{resp['bully']}"
+        return await dr.reply(results)
+    except Exception:
+        await dr.reply(f"Error Report @{SUPPORT_CHAT}")
+
+
+@register(pattern="^/advice ?(.*)")
+async def _(dr):
+    try:
+        resp = requests.get("https://api.safone.tech/advice").json()
+        results = f"{resp['advice']}"
         return await dr.reply(results)
     except Exception:
         await dr.reply(f"Error Report @{SUPPORT_CHAT}")
@@ -186,11 +240,11 @@ async def msg(event):
     text = re.sub(r"ｎ([ａｅｉｏｕ])", r"ｎｙ\1", text)
     text = re.sub(r"N([aeiouAEIOU])", r"Ny\1", text)
     text = re.sub(r"Ｎ([ａｅｉｏｕＡＥＩＯＵ])", r"Ｎｙ\1", text)
-    text = re.sub(r"\!+", " " + random.choice(faces), text)
-    text = re.sub(r"！+", " " + random.choice(faces), text)
+    text = re.sub(r"\!+", f" {random.choice(faces)}", text)
+    text = re.sub(r"！+", f" {random.choice(faces)}", text)
     text = text.replace("ove", "uv")
     text = text.replace("ｏｖｅ", "ｕｖ")
-    text += " " + random.choice(faces)
+    text += f" {random.choice(faces)}"
     await event.reply(text)
 
 
@@ -243,7 +297,8 @@ async def msg(event):
         elif c.lower() == b_char:
             reply_text += "🅱️"
         else:
-            reply_text += c.upper() if bool(random.getrandbits(1)) else c.lower()
+            reply_text += c.upper() if bool(
+                random.getrandbits(1)) else c.lower()
     reply_text += random.choice(emojis)
     await event.reply(reply_text)
 
@@ -340,6 +395,7 @@ async def msg(event):
     reply_text = string.capwords(" ".join(reply_text))
     await event.reply(reply_text)
 
+
 @register(pattern="^/angrymoji$")
 async def msg(event):
 
@@ -369,18 +425,16 @@ async def msg(event):
     reply_text += " 😭"
     await event.reply(reply_text)
 
-    
+
 @pgram.on_message(filters.command("carbon"))
 @capture_err
 async def carbon_func(_, message):
     if not message.reply_to_message:
         return await message.reply_text(
-            "Reply to a text message to make carbon."
-        )
+            "Reply to a text message to make carbon.")
     if not message.reply_to_message.text:
         return await message.reply_text(
-            "Reply to a text message to make carbon."
-        )
+            "Reply to a text message to make carbon.")
     m = await message.reply_text("Preparing Carbon.")
     carbon = await make_carbon(message.reply_to_message.text)
     await m.edit("Uploading...")
@@ -430,15 +484,15 @@ async def deepfry(img: Image) -> Image:
     img = img.convert("RGB")
     width, height = img.width, img.height
     img = img.resize(
-        (int(width ** uniform(0.8, 0.9)), int(height ** uniform(0.8, 0.9))),
+        (int(width**uniform(0.8, 0.9)), int(height**uniform(0.8, 0.9))),
         resample=Image.LANCZOS,
     )
     img = img.resize(
-        (int(width ** uniform(0.85, 0.95)), int(height ** uniform(0.85, 0.95))),
+        (int(width**uniform(0.85, 0.95)), int(height**uniform(0.85, 0.95))),
         resample=Image.BILINEAR,
     )
     img = img.resize(
-        (int(width ** uniform(0.89, 0.98)), int(height ** uniform(0.89, 0.98))),
+        (int(width**uniform(0.89, 0.98)), int(height**uniform(0.89, 0.98))),
         resample=Image.BICUBIC,
     )
     img = img.resize((width, height), resample=Image.BICUBIC)
@@ -458,17 +512,11 @@ async def check_media(reply_message):
     if reply_message.photo:
         data = reply_message.photo
     elif reply_message.document:
-        if (
-            DocumentAttributeFilename(file_name="AnimatedSticker.tgs")
-            in reply_message.media.document.attributes
-        ):
+        if (DocumentAttributeFilename(file_name="AnimatedSticker.tgs")
+                in reply_message.media.document.attributes):
             return False
-        if (
-            reply_message.gif
-            or reply_message.video
-            or reply_message.audio
-            or reply_message.voice
-        ):
+        if (reply_message.gif or reply_message.video or reply_message.audio
+                or reply_message.voice):
             return False
         data = reply_message.media.document
     else:
@@ -490,8 +538,8 @@ async def typewriter(typew):
     now = await typew.reply(typing_symbol)
     await asyncio.sleep(2)
     for character in message:
-        old_text = old_text + "" + character
-        typing_text = old_text + "" + typing_symbol
+        old_text = f"{old_text}{character}"
+        typing_text = f"{old_text}{typing_symbol}"
         await now.edit(typing_text)
         await asyncio.sleep(2)
         await now.edit(old_text)
@@ -531,9 +579,10 @@ async def sticklet(event):
         font = ImageFont.truetype(FONT_FILE, size=fontsize)
 
     width, height = draw.multiline_textsize(sticktext, font=font)
-    draw.multiline_text(
-        ((512 - width) / 2, (512 - height) / 2), sticktext, font=font, fill=(R, G, B)
-    )
+    draw.multiline_text(((512 - width) / 2, (512 - height) / 2),
+                        sticktext,
+                        font=font,
+                        fill=(R, G, B))
 
     image_stream = io.BytesIO()
     image_stream.name = "@Julia.webp"
@@ -541,14 +590,13 @@ async def sticklet(event):
     image_stream.seek(0)
 
     # finally, reply the sticker
-    await event.reply(file=image_stream, reply_to=event.message.reply_to_msg_id)
+    await event.reply(file=image_stream,
+                      reply_to=event.message.reply_to_msg_id)
     # replacing upper line with this to get reply tags
 
     # cleanup
-    try:
+    with contextlib.suppress(BaseException):
         os.remove(FONT_FILE)
-    except BaseException:
-        pass
 
 
 async def get_font_file(client, channel_id):
@@ -569,7 +617,6 @@ async def get_font_file(client, channel_id):
 
 @register(pattern=r"^/(\w+)say (.*)")
 async def univsaye(cowmsg):
-
     """For .cowsay module, uniborg wrapper for cow which says things."""
     if cowmsg.text[0].isalpha() or cowmsg.text[0] in ("#", "@"):
         return
@@ -592,16 +639,14 @@ async def _(event):
     if event.fwd_from:
         return
 
-    input_str = print(randrange(6))
+    input_str = LOGGER.debug(randrange(6))
     r = await event.reply(file=InputMediaDice("🏀"))
     if input_str:
-        try:
+        with contextlib.suppress(BaseException):
             required_number = int(input_str)
             while r.media.value != required_number:
                 await r.delete()
                 r = await event.reply(file=InputMediaDice("🏀"))
-        except BaseException:
-            pass
 
 
 @register(pattern="^/jackpot$")
@@ -621,15 +666,13 @@ async def _(event):
     input_int = int(input_str)
     if input_int > 6:
         await event.reply("hey nigga use number 1 to 6 only")
-    
+
     else:
-        try:
+        with contextlib.suppress(BaseException):
             required_number = input_int
             while r.media.value != required_number:
                 await r.delete()
                 r = await event.reply(file=InputMediaDice("🎯"))
-        except BaseException:
-            pass
 
 
 # Oringinal Source from Nicegrill: https://github.com/erenmetesar/NiceGrill/
@@ -646,7 +689,6 @@ COLORS = [
     "#E181AC",
 ]
 
-
 EMOJI_PATTERN = re.compile(
     "["
     "\U0001F1E0-\U0001F1FF"  # flags (iOS)
@@ -660,8 +702,7 @@ EMOJI_PATTERN = re.compile(
     "\U0001FA00-\U0001FA6F"  # Chess Symbols
     "\U0001FA70-\U0001FAFF"  # Symbols and Pictographs Extended-A
     "\U00002702-\U000027B0"  # Dingbats
-    "]+"
-)
+    "]+")
 
 
 def deEmojify(inputString: str) -> str:
@@ -678,8 +719,7 @@ async def stickerizer(event):
     newtext = event.pattern_match.group(1)
     animus = [20, 32, 33, 40, 41, 42, 58]
     sticcers = await ubot.inline_query(
-        "stickerizerbot", f"#{random.choice(animus)}{(deEmojify(newtext))}"
-    )
+        "stickerizerbot", f"#{random.choice(animus)}{(deEmojify(newtext))}")
     null = await sticcers[0].download_media(TEMP_DOWNLOAD_DIRECTORY)
     bara = str(null)
     await event.client.send_file(event.chat_id, bara, reply_to=event.id)
@@ -695,15 +735,13 @@ async def _(event):
     input_int = int(input_str)
     if input_int > 6:
         await event.reply("hey nigga use number 1 to 6 only")
-    
+
     else:
-        try:
+        with contextlib.suppress(BaseException):
             required_number = input_int
             while r.media.value != required_number:
                 await r.delete()
                 r = await event.reply(file=InputMediaDice(""))
-        except BaseException:
-            pass
 
 
 @register(pattern="^/fortune$")
@@ -986,7 +1024,9 @@ async def _(event):
         replyto = reply.sender_id
     else:
         replyto = event.sender_id
-    await telethn.send_message(event.chat_id, random.choice(SFW_STRINGS), reply_to=replyto)
+    await telethn.send_message(event.chat_id,
+                               random.choice(SFW_STRINGS),
+                               reply_to=replyto)
 
 
 reactionhappy = [

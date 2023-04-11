@@ -1,33 +1,37 @@
 """
-MIT License
+BSD 2-Clause License
 
 Copyright (C) 2017-2019, Paul Larsen
-Copyright (C) 2021 Awesome-RJ
-Copyright (c) 2021, Yūki • Black Knights Union, <https://github.com/Awesome-RJ/CutiepiiRobot>
+Copyright (C) 2021-2022, Awesome-RJ, [ https://github.com/Awesome-RJ ]
+Copyright (c) 2021-2022, Yūki • Black Knights Union, [ https://github.com/Awesome-RJ/CutiepiiRobot ]
 
-This file is part of @Cutiepii_Robot (Telegram Bot)
+All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
-furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 RUN_STRINGS = (
-    "Now you see me, now you don't.", "ε=ε=ε=ε=┌(;￣▽￣)┘",
+    "Now you see me, now you don't.",
+    "ε=ε=ε=ε=┌(;￣▽￣)┘",
     "Get back here!",
     "REEEEEEEEEEEEEEEEEE!!!!!!!",
     "Look out for the wall!",
@@ -73,7 +77,7 @@ SLAP_TEMPLATES = (
     "{user2} is out of usable Pokemon! {user2} whited out!.",
     "{user2} is out of usable Pokemon! {user2} blacked out!.",
     "{user2} got rekt.",
-    "{user2}'s melon was split by {user1}.",
+    "{user2}s melon was split by {user1}.",
     "{user2} was sliced and diced by {user1}.",
     "{user2} played hot-potato with a grenade.",
     "{user2} was knifed by {user1}.",
@@ -479,9 +483,7 @@ GBUN = (
     "Nah, He Looks Innocent...",
 )
 
-
 GBAM = "<b>Beginning Of Global Bam For {user2}</b>  \n \nChat Id : <code>{chatid}</code> \nReason : <i>{reason}</i> \nGBammed By {user1}"
-
 
 GBAM_REASON = (
     "sasta noob",
@@ -585,7 +587,7 @@ GDMORNING = (
     "`The more you count yourself as blessed, the more blessed you will be. Thank God for this beautiful morning and let friendship and love prevail this morning.`",
     "`Wake up and sip a cup of loving friendship. Eat your heart out from a plate of hope. To top it up, a fork full of kindness and love. Enough for a happy good morning!`",
     "`It is easy to imagine the world coming to an end. But it is difficult to imagine spending a day without my friends. Good morning.`",
-    )
+)
 
 CUDDLE_GIF = [
     "CgACAgQAAxkBAAIPy2C0fJmMJlku6c-ugz7UVD-dlAdIAAIyAgACJDqUUrjsIE0L5PsMHwQ",
@@ -622,8 +624,7 @@ FLIRT_TEXT = (
     "I was wondering if you could tell me: If you’re here, who’s running Heaven?",
     "No wonder the sky is gray tonight , cause all the color is in your eyes.",
     "You’ve got everything I’ve been searching for, and believe me—I’ve been looking a long time.",
-    "Do you have a map? I just got lost in your eyes."
-)
+    "Do you have a map? I just got lost in your eyes.")
 
 ROMANCE_GIFS = [
     "CgACAgQAAxkBAAIQIWC0g6ovGy7YT-Y66XfpFVEKwTXKAAJ8AgACTu6sUN0m69FQv9tHHwQ",
@@ -632,7 +633,7 @@ ROMANCE_GIFS = [
     "CgACAgQAAxkBAAIQJGC0g8L4cYfXRxE42YOTOcTCn8d9AAIoAgACqhGMUnPCWXH2RqPwHwQ",
     "CgACAgQAAxkBAAIQJWC0g9GEFeRewmfL7Ei4ZaCdQ9p4AAIEAgAC_3xlUB5O5hIl3CbxHwQ",
     "CgACAgQAAxkBAAIQJmC0g92L9jTq89JBieJCumwYCFPwAAIiAgAC1z2UUlOhsI6CxkHXHwQ"
-] 
+]
 
 ROMANCE_STICKERS = [
     "CAACAgQAAxkBAAIQM2C0hTjoZ6imrf90bzPD6RmGkl2ZAAJaLgAClGBOA7Ky9sn-fqeXHwQ",
@@ -647,8 +648,7 @@ ROMANCE_TEMPLATES = (
     "So it’s not gonna be easy. It’s gonna be really hard. We’re gonna have to work at this every day, but I want to do that because I want you. I want all of you, forever, you and me, every day.",
     "I wish I knew how to quit you.",
     "Make me a radio and turn me up when you feel low.",
-    "I can't see anything that I don't like about you."
-)
+    "I can't see anything that I don't like about you.")
 
 UWU_GIFS = [
     "CgACAgQAAxkBAAIQQmC0hzeH3jUWqOpCnK383r-TPBwSAAJmAgACuciMUgfkgemP5m1zHwQ",

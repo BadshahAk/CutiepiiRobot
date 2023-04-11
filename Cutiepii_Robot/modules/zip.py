@@ -1,29 +1,32 @@
 """
-MIT License
+BSD 2-Clause License
 
 Copyright (C) 2017-2019, Paul Larsen
-Copyright (C) 2021 Awesome-RJ
-Copyright (c) 2021, Yūki • Black Knights Union, <https://github.com/Awesome-RJ/CutiepiiRobot>
+Copyright (C) 2021-2022, Awesome-RJ, [ https://github.com/Awesome-RJ ]
+Copyright (c) 2021-2022, Yūki • Black Knights Union, [ https://github.com/Awesome-RJ/CutiepiiRobot ]
 
-This file is part of @Cutiepii_Robot (Telegram Bot)
+All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
-furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import os
@@ -37,7 +40,6 @@ from telethon.tl.types import DocumentAttributeVideo
 from hachoir.metadata import extractMetadata
 from hachoir.parser import createParser
 
-
 from Cutiepii_Robot import TEMP_DOWNLOAD_DIRECTORY, telethn
 from Cutiepii_Robot.events import register
 
@@ -46,17 +48,16 @@ async def is_register_admin(chat, user):
     if isinstance(chat, (types.InputPeerChannel, types.InputChannel)):
 
         return isinstance(
-            (
-                await telethn(functions.channels.GetParticipantRequest(chat, user))
-            ).participant,
+            (await
+             telethn(functions.channels.GetParticipantRequest(chat, user)
+                     )).participant,
             (types.ChannelParticipantAdmin, types.ChannelParticipantCreator),
         )
     if isinstance(chat, types.InputPeerChat):
 
         ui = await telethn.get_peer_id(user)
-        ps = (
-            await telethn(functions.messages.GetFullChatRequest(chat.chat_id))
-        ).full_chat.participants.participants
+        ps = (await telethn(functions.messages.GetFullChatRequest(chat.chat_id)
+                            )).full_chat.participants.participants
         return isinstance(
             next((p for p in ps if p.user_id == ui), None),
             (types.ChatParticipantAdmin, types.ChatParticipantCreator),
@@ -72,10 +73,8 @@ async def _(event):
     if not event.is_reply:
         await event.reply("Reply to a file to compress it.")
         return
-    if (
-        event.is_group
-        and not (await is_register_admin(event.input_chat, event.message.sender_id))
-    ):
+    if (event.is_group and not (await is_register_admin(
+            event.input_chat, event.message.sender_id))):
         await event.reply(
             "Hey, You are not admin. You can't use this command, But you can use in my pm 🙂"
         )
@@ -88,33 +87,34 @@ async def _(event):
         try:
             time.time()
             downloaded_file_name = await event.telethn.download_media(
-                reply_message, TEMP_DOWNLOAD_DIRECTORY
-            )
+                reply_message, TEMP_DOWNLOAD_DIRECTORY)
             directory_name = downloaded_file_name
         except Exception as e:  # pylint:disable=C0103,W0703
             await mone.reply(str(e))
-    zipfile.ZipFile(directory_name + ".zip", "w", zipfile.ZIP_DEFLATED).write(
-        directory_name
-    )
+    zipfile.ZipFile(f"{directory_name}.zip", "w",
+                    zipfile.ZIP_DEFLATED).write(directory_name)
+
     await event.telethn.send_file(
         event.chat_id,
-        directory_name + ".zip",
+        f"{directory_name}.zip",
         force_document=True,
         allow_cache=False,
         reply_to=event.message.id,
     )
+
     await mone.delete()
 
 
 def zipdir(path, ziph):
     # ziph is zipfile handle
-    for root, dirs, files in os.walk(path):
+    for root, files in os.walk(path):
         for file in files:
             ziph.write(os.path.join(root, file))
             os.remove(os.path.join(root, file))
 
-extracted = TEMP_DOWNLOAD_DIRECTORY + "extracted/"
-thumb_image_path = TEMP_DOWNLOAD_DIRECTORY + "/thumb_image.jpg"
+
+extracted = f"{TEMP_DOWNLOAD_DIRECTORY}extracted/"
+thumb_image_path = f"{TEMP_DOWNLOAD_DIRECTORY}/thumb_image.jpg"
 if not os.path.isdir(extracted):
     os.makedirs(extracted)
 
@@ -123,17 +123,16 @@ async def is_register_admin(chat, user):
     if isinstance(chat, (types.InputPeerChannel, types.InputChannel)):
 
         return isinstance(
-            (
-                await telethn(functions.channels.GetParticipantRequest(chat, user))
-            ).participant,
+            (await
+             telethn(functions.channels.GetParticipantRequest(chat, user)
+                     )).participant,
             (types.ChannelParticipantAdmin, types.ChannelParticipantCreator),
         )
     if isinstance(chat, types.InputPeerChat):
 
         ui = await telethn.get_peer_id(user)
-        ps = (
-            await telethn(functions.messages.GetFullChatRequest(chat.chat_id))
-        ).full_chat.participants.participants
+        ps = (await telethn(functions.messages.GetFullChatRequest(chat.chat_id)
+                            )).full_chat.participants.participants
         return isinstance(
             next((p for p in ps if p.user_id == ui), None),
             (types.ChatParticipantAdmin, types.ChatParticipantCreator),
@@ -149,10 +148,8 @@ async def _(event):
     if not event.is_reply:
         await event.reply("Reply to a zip file.")
         return
-    if (
-        event.is_group
-        and not (await is_register_admin(event.input_chat, event.message.sender_id))
-    ):
+    if (event.is_group and not (await is_register_admin(
+            event.input_chat, event.message.sender_id))):
         await event.reply(
             "Hey, You are not admin. You can't use this command, But you can use in my pm 🙂"
         )
@@ -167,8 +164,7 @@ async def _(event):
         try:
             time.time()
             downloaded_file_name = await telethn.download_media(
-                reply_message, TEMP_DOWNLOAD_DIRECTORY
-            )
+                reply_message, TEMP_DOWNLOAD_DIRECTORY)
         except Exception as e:
             await mone.reply(str(e))
         else:
@@ -189,9 +185,11 @@ async def _(event):
                     metadata = extractMetadata(createParser(single_file))
                     width = 0
                     height = 0
-                    duration = metadata.get("duration").seconds if metadata.has("duration") else 0
+                    duration = metadata.get(
+                        "duration").seconds if metadata.has("duration") else 0
                     if os.path.exists(thumb_image_path):
-                        metadata = extractMetadata(createParser(thumb_image_path))
+                        metadata = extractMetadata(
+                            createParser(thumb_image_path))
                         if metadata.has("width"):
                             width = metadata.get("width")
                         if metadata.has("height"):
@@ -218,9 +216,10 @@ async def _(event):
                 except Exception as e:
                     await telethn.send_message(
                         event.chat_id,
-                        "{} caused `{}`".format(caption_rts, str(e)),
+                        f"{caption_rts} caused `{str(e)}`",
                         reply_to=event.message.id,
                     )
+
                     continue
                 await mone.delete()
                 os.remove(single_file)

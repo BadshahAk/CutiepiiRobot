@@ -1,38 +1,42 @@
 """
-MIT License
+BSD 2-Clause License
 
 Copyright (C) 2017-2019, Paul Larsen
-Copyright (C) 2021 Awesome-RJ
-Copyright (c) 2021, Yūki • Black Knights Union, <https://github.com/Awesome-RJ/CutiepiiRobot>
+Copyright (C) 2021-2022, Awesome-RJ, [ https://github.com/Awesome-RJ ]
+Copyright (c) 2021-2022, Yūki • Black Knights Union, [ https://github.com/Awesome-RJ/CutiepiiRobot ]
 
-This file is part of @Cutiepii_Robot (Telegram Bot)
+All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
-furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import ast
 import threading
 
-from Cutiepii_Robot import dispatcher
+from Cutiepii_Robot import CUTIEPII_PTB, LOGGER
 from Cutiepii_Robot.modules.sql import BASE, SESSION
+from telegram.error import BadRequest, Forbidden
 from sqlalchemy import Boolean, Column, Integer, String, UnicodeText
-from telegram.error import BadRequest, Unauthorized
+from sqlalchemy.sql.sqltypes import BigInteger
 
 
 class Federations(BASE):
@@ -87,14 +91,14 @@ class BansF(BASE):
 
 class FedsUserSettings(BASE):
     __tablename__ = "feds_settings"
-    user_id = Column(Integer, primary_key=True)
+    user_id = Column(BigInteger, primary_key=True)
     should_report = Column(Boolean, default=True)
 
     def __init__(self, user_id):
         self.user_id = user_id
 
     def __repr__(self):
-        return "<Feds report settings ({})>".format(self.user_id)
+        return f"<Feds report settings ({self.user_id})>"
 
 
 class FedSubs(BASE):
@@ -107,7 +111,7 @@ class FedSubs(BASE):
         self.fed_subs = fed_subs
 
     def __repr__(self):
-        return "<Fed {} subscribes for {}>".format(self.fed_id, self.fed_subs)
+        return f"<Fed {self.fed_id} subscribes for {self.fed_subs}>"
 
 
 # Dropping db
@@ -218,7 +222,7 @@ def get_user_fbanlist(user_id):
     fedname = []
     for x in banlist:
         if banlist[x].get(user_id):
-            if user_name == "":
+            if not user_name:
                 user_name = banlist[x][user_id].get("first_name")
             fedname.append([x, banlist[x][user_id].get("reason")])
     return user_name, fedname
@@ -226,7 +230,6 @@ def get_user_fbanlist(user_id):
 
 def new_fed(owner_id, fed_name, fed_id):
     with FEDS_LOCK:
-        global FEDERATION_BYOWNER, FEDERATION_BYFEDID, FEDERATION_BYNAME
         fed = Federations(
             str(owner_id),
             fed_name,
@@ -263,7 +266,6 @@ def new_fed(owner_id, fed_name, fed_id):
 
 def del_fed(fed_id):
     with FEDS_LOCK:
-        global FEDERATION_BYOWNER, FEDERATION_BYFEDID, FEDERATION_BYNAME, FEDERATION_CHATS, FEDERATION_CHATS_BYID, FEDERATION_BANNED_USERID, FEDERATION_BANNED_FULL
         getcache = FEDERATION_BYFEDID.get(fed_id)
         if getcache is None:
             return False
@@ -277,39 +279,30 @@ def del_fed(fed_id):
         FEDERATION_BYNAME.pop(fed_name)
         if FEDERATION_CHATS_BYID.get(fed_id):
             for x in FEDERATION_CHATS_BYID[fed_id]:
-                delchats = SESSION.query(ChatF).get(str(x))
-                if delchats:
+                if delchats := SESSION.query(ChatF).get(str(x)):
                     SESSION.delete(delchats)
                     SESSION.commit()
                 FEDERATION_CHATS.pop(x)
             FEDERATION_CHATS_BYID.pop(fed_id)
-        # Delete fedban users
-        getall = FEDERATION_BANNED_USERID.get(fed_id)
-        if getall:
+        if getall := FEDERATION_BANNED_USERID.get(fed_id):
             for x in getall:
-                banlist = SESSION.query(BansF).get((fed_id, str(x)))
-                if banlist:
+                if banlist := SESSION.query(BansF).get((fed_id, str(x))):
                     SESSION.delete(banlist)
                     SESSION.commit()
         if FEDERATION_BANNED_USERID.get(fed_id):
             FEDERATION_BANNED_USERID.pop(fed_id)
         if FEDERATION_BANNED_FULL.get(fed_id):
             FEDERATION_BANNED_FULL.pop(fed_id)
-        # Delete fedsubs
-        getall = MYFEDS_SUBSCRIBER.get(fed_id)
-        if getall:
+        if getall := MYFEDS_SUBSCRIBER.get(fed_id):
             for x in getall:
-                getsubs = SESSION.query(FedSubs).get((fed_id, str(x)))
-                if getsubs:
+                if getsubs := SESSION.query(FedSubs).get((fed_id, str(x))):
                     SESSION.delete(getsubs)
                     SESSION.commit()
         if FEDS_SUBSCRIBER.get(fed_id):
             FEDS_SUBSCRIBER.pop(fed_id)
         if MYFEDS_SUBSCRIBER.get(fed_id):
             MYFEDS_SUBSCRIBER.pop(fed_id)
-        # Delete from database
-        curr = SESSION.query(Federations).get(fed_id)
-        if curr:
+        if curr := SESSION.query(Federations).get(fed_id):
             SESSION.delete(curr)
             SESSION.commit()
         return True
@@ -317,7 +310,6 @@ def del_fed(fed_id):
 
 def rename_fed(fed_id, owner_id, newname):
     with FEDS_LOCK:
-        global FEDERATION_BYFEDID, FEDERATION_BYOWNER, FEDERATION_BYNAME
         fed = SESSION.query(Federations).get(fed_id)
         if not fed:
             return False
@@ -337,7 +329,6 @@ def rename_fed(fed_id, owner_id, newname):
 
 def chat_join_fed(fed_id, chat_name, chat_id):
     with FEDS_LOCK:
-        global FEDERATION_CHATS, FEDERATION_CHATS_BYID
         r = ChatF(chat_id, chat_name, fed_id)
         SESSION.add(r)
         FEDERATION_CHATS[str(chat_id)] = {"chat_name": chat_name, "fid": fed_id}
@@ -366,7 +357,6 @@ def search_user_in_fed(fed_id, user_id):
 
 def user_demote_fed(fed_id, user_id):
     with FEDS_LOCK:
-        global FEDERATION_BYOWNER, FEDERATION_BYFEDID, FEDERATION_BYNAME
         # Variables
         getfed = FEDERATION_BYFEDID.get(str(fed_id))
         owner_id = getfed["owner"]
@@ -405,7 +395,6 @@ def user_demote_fed(fed_id, user_id):
 
 def user_join_fed(fed_id, user_id):
     with FEDS_LOCK:
-        global FEDERATION_BYOWNER, FEDERATION_BYFEDID, FEDERATION_BYNAME
         # Variables
         getfed = FEDERATION_BYFEDID.get(str(fed_id))
         owner_id = getfed["owner"]
@@ -442,7 +431,6 @@ def user_join_fed(fed_id, user_id):
 
 def chat_leave_fed(chat_id):
     with FEDS_LOCK:
-        global FEDERATION_CHATS, FEDERATION_CHATS_BYID
         # Set variables
         fed_info = FEDERATION_CHATS.get(str(chat_id))
         if fed_info is None:
@@ -487,7 +475,6 @@ def all_fed_members(fed_id):
 
 def set_frules(fed_id, rules):
     with FEDS_LOCK:
-        global FEDERATION_BYOWNER, FEDERATION_BYFEDID, FEDERATION_BYNAME
         # Variables
         getfed = FEDERATION_BYFEDID.get(str(fed_id))
         owner_id = getfed["owner"]
@@ -571,10 +558,10 @@ def multi_fban_user(
         SESSION.add(r)
         counter += 1
         if str(str(counter)[-2:]) == "00":
-            print(user_id)
-            print(first_name)
-            print(reason)
-            print(counter)
+            LOGGER.debug(user_id)
+            LOGGER.debug(first_name)
+            LOGGER.debug(reason)
+            LOGGER.debug(counter)
     try:
         SESSION.commit()
     except:
@@ -583,7 +570,7 @@ def multi_fban_user(
     finally:
         SESSION.commit()
     __load_all_feds_banned()
-    print("Done")
+    LOGGER.debug("Done")
     return counter
 
 
@@ -595,7 +582,7 @@ def un_fban_user(fed_id, user_id):
                 SESSION.delete(I)
         try:
             SESSION.commit()
-        except:
+        except Exception:
             SESSION.rollback()
             return False
         finally:
@@ -603,20 +590,19 @@ def un_fban_user(fed_id, user_id):
         __load_all_feds_banned()
         return I
 
-
 def get_fban_user(fed_id, user_id):
     list_fbanned = FEDERATION_BANNED_USERID.get(fed_id)
     if list_fbanned is None:
         FEDERATION_BANNED_USERID[fed_id] = []
-    if user_id in FEDERATION_BANNED_USERID[fed_id]:
-        r = SESSION.query(BansF).all()
-        reason = None
-        for I in r:
-            if I.fed_id == fed_id and int(I.user_id) == int(user_id):
-                reason = I.reason
-                time = I.time
-        return True, reason, time
-    return False, None, None
+    if user_id not in FEDERATION_BANNED_USERID[fed_id]:
+        return False, None, None
+    r = SESSION.query(BansF).all()
+    reason = None
+    for I in r:
+        if I.fed_id == fed_id and int(I.user_id) == int(user_id):
+            reason = I.reason
+            time = I.time
+    return True, reason, time
 
 
 def get_all_fban_users(fed_id):
@@ -635,24 +621,19 @@ def get_all_fban_users_target(fed_id, user_id):
 
 
 def get_all_fban_users_global():
-    list_fbanned = FEDERATION_BANNED_USERID
     total = []
     for x in list(FEDERATION_BANNED_USERID):
-        for y in FEDERATION_BANNED_USERID[x]:
-            total.append(y)
+        total.extend(iter(FEDERATION_BANNED_USERID[x]))
     return total
 
 
 def get_all_feds_users_global():
-    list_fed = FEDERATION_BYFEDID
     return [FEDERATION_BYFEDID[x] for x in list(FEDERATION_BYFEDID)]
 
 
 def search_fed_by_id(fed_id):
     get = FEDERATION_BYFEDID.get(fed_id)
-    if get is None:
-        return False
-    return get
+    return False if get is None else get
 
 
 def user_feds_report(user_id: int) -> bool:
@@ -664,7 +645,6 @@ def user_feds_report(user_id: int) -> bool:
 
 def set_feds_setting(user_id: int, setting: bool):
     with FEDS_SETTINGS_LOCK:
-        global FEDERATION_NOTIFICATION
         user_setting = SESSION.query(FedsUserSettings).get(user_id)
         if not user_setting:
             user_setting = FedsUserSettings(user_id)
@@ -675,7 +655,7 @@ def set_feds_setting(user_id: int, setting: bool):
         SESSION.commit()
 
 
-def get_fed_log(fed_id):
+async def get_fed_log(fed_id):
     fed_setting = FEDERATION_BYFEDID.get(str(fed_id))
     if fed_setting is None:
         fed_setting = False
@@ -684,17 +664,15 @@ def get_fed_log(fed_id):
         return False
     if fed_setting.get("flog"):
         try:
-            dispatcher.bot.get_chat(fed_setting.get("flog"))
-        except (BadRequest, Unauthorized):
+            await CUTIEPII_PTB.bot.get_chat(fed_setting.get("flog"))
+        except (BadRequest, Forbidden):
             set_fed_log(fed_id, None)
             return False
         return fed_setting.get("flog")
     return False
 
-
 def set_fed_log(fed_id, chat_id):
     with FEDS_LOCK:
-        global FEDERATION_BYOWNER, FEDERATION_BYFEDID, FEDERATION_BYNAME
         # Variables
         getfed = FEDERATION_BYFEDID.get(str(fed_id))
         owner_id = getfed["owner"]
@@ -712,20 +690,18 @@ def set_fed_log(fed_id, chat_id):
         )
         SESSION.merge(fed)
         SESSION.commit()
-        print(fed_log)
+        LOGGER.debug(fed_log)
         return True
 
 
 def subs_fed(fed_id, my_fed):
-    check = get_spec_subs(fed_id, my_fed)
-    if check:
+    if check := get_spec_subs(fed_id, my_fed):
         return False
     with FEDS_SUBSCRIBER_LOCK:
         subsfed = FedSubs(fed_id, my_fed)
 
         SESSION.merge(subsfed)  # merge to avoid duplicate key issues
         SESSION.commit()
-        global FEDS_SUBSCRIBER, MYFEDS_SUBSCRIBER
         #Temporary Data For Subbed Feds
         if FEDS_SUBSCRIBER.get(fed_id, set()) == set():
             FEDS_SUBSCRIBER[fed_id] = {my_fed}
@@ -741,8 +717,7 @@ def subs_fed(fed_id, my_fed):
 
 def unsubs_fed(fed_id, my_fed):
     with FEDS_SUBSCRIBER_LOCK:
-        getsubs = SESSION.query(FedSubs).get((fed_id, my_fed))
-        if getsubs:
+        if getsubs := SESSION.query(FedSubs).get((fed_id, my_fed)):
             if my_fed in FEDS_SUBSCRIBER.get(fed_id, set()):  # sanity check
                 FEDS_SUBSCRIBER.get(fed_id, set()).remove(my_fed)
             if fed_id in MYFEDS_SUBSCRIBER.get(my_fed, set()):  # sanity check
@@ -775,7 +750,6 @@ def get_subscriber(fed_id):
 
 
 def __load_all_feds():
-    global FEDERATION_BYOWNER, FEDERATION_BYFEDID, FEDERATION_BYNAME
     try:
         feds = SESSION.query(Federations).all()
         for x in feds:  # remove tuple by ( ,)
@@ -864,7 +838,6 @@ def __load_all_feds_banned():
 
 
 def __load_all_feds_settings():
-    global FEDERATION_NOTIFICATION
     try:
         getuser = SESSION.query(FedsUserSettings).all()
         for x in getuser:
@@ -887,9 +860,10 @@ def __load_feds_subscriber():
             FEDS_SUBSCRIBER[x.fed_id] += [x.fed_subs]
             try:
                 MYFEDS_SUBSCRIBER[x.fed_subs] += [x.fed_id]
-            except KeyError:
-                getsubs = SESSION.query(FedSubs).get((x.fed_id, x.fed_subs))
-                if getsubs:
+            except (KeyError, IndexError):
+                if getsubs := SESSION.query(FedSubs).get(
+                    (x.fed_id, x.fed_subs)
+                ):
                     SESSION.delete(getsubs)
                     SESSION.commit()
 

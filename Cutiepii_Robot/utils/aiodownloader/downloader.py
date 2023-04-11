@@ -1,29 +1,32 @@
 """
-MIT License
+BSD 2-Clause License
 
 Copyright (C) 2017-2019, Paul Larsen
-Copyright (C) 2021 Awesome-RJ
-Copyright (c) 2021, Yūki • Black Knights Union, <https://github.com/Awesome-RJ/CutiepiiRobot>
+Copyright (C) 2021-2022, Awesome-RJ, [ https://github.com/Awesome-RJ ]
+Copyright (c) 2021-2022, Yūki • Black Knights Union, [ https://github.com/Awesome-RJ/CutiepiiRobot ]
 
-This file is part of @Cutiepii_Robot (Telegram Bot)
+All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
-furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import asyncio
@@ -56,11 +59,8 @@ class DownloadJob:
         self._chunk_size = chunk_size
 
         self.file_name = file_url.split("/")[~0][0:230]
-        self.file_path = (
-            os.path.join(save_path, self.file_name)
-            if save_path
-            else self.file_name
-        )
+        self.file_path = (os.path.join(save_path, self.file_name)
+                          if save_path else self.file_name)
 
         self.completed = False
         self.progress = 0
@@ -78,7 +78,8 @@ class DownloadJob:
 
                 else:
                     raise aiohttp.errors.HttpProcessingError(
-                        message=f"There was a problem processing {self.file_url}",
+                        message=
+                        f"There was a problem processing {self.file_url}",
                         code=resp.status,
                     )
 
@@ -105,8 +106,7 @@ class DownloadJob:
 
                     # Downloading the file using the aiohttp.StreamReader
                     async for data in resp.content.iter_chunked(
-                        self._chunk_size
-                    ):
+                            self._chunk_size):
                         await file.write(data)
                         self._downloaded(self._chunk_size)
 
@@ -138,22 +138,21 @@ class Handler:
         self._session = session or aiohttp.ClientSession(loop=self._loop)
         self._chunk_size = chunk_size
 
-    def _job_factory(
-        self, file_url: str, save_path: Optional[str] = None
-    ) -> DownloadJob:
+    def _job_factory(self,
+                     file_url: str,
+                     save_path: Optional[str] = None) -> DownloadJob:
         """
         Shortcut for creating a download job. It adds the session and the chunk size.
         :param file_url: url where the file is located
         :param save_path: save path for the download
         :return:
         """
-        return DownloadJob(
-            self._session, file_url, save_path, self._chunk_size
-        )
+        return DownloadJob(self._session, file_url, save_path,
+                           self._chunk_size)
 
-    async def download(
-        self, url: str, save_path: Optional[str] = None
-    ) -> DownloadJob:
+    async def download(self,
+                       url: str,
+                       save_path: Optional[str] = None) -> DownloadJob:
         """
         Downloads a bulk of files from the given list of urls to the given path.
         :param files_url: list of urls where the files are located

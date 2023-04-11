@@ -1,29 +1,32 @@
 """
-MIT License
+BSD 2-Clause License
 
 Copyright (C) 2017-2019, Paul Larsen
-Copyright (C) 2021 Awesome-RJ
-Copyright (c) 2021, Yūki • Black Knights Union, <https://github.com/Awesome-RJ/CutiepiiRobot>
+Copyright (C) 2021-2022, Awesome-RJ, [ https://github.com/Awesome-RJ ]
+Copyright (c) 2021-2022, Yūki • Black Knights Union, [ https://github.com/Awesome-RJ/CutiepiiRobot ]
 
-This file is part of @Cutiepii_Robot (Telegram Bot)
+All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
-furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import threading
@@ -31,6 +34,7 @@ import time
 from typing import Union
 
 from sqlalchemy import Column, String, Boolean, UnicodeText, Integer
+from sqlalchemy.sql.sqltypes import BigInteger
 
 from Cutiepii_Robot.modules.sql import SESSION, BASE
 
@@ -45,14 +49,12 @@ class ChatAccessConnectionSettings(BASE):
         self.allow_connect_to_chat = str(allow_connect_to_chat)
 
     def __repr__(self):
-        return "<Chat access settings ({}) is {}>".format(
-            self.chat_id, self.allow_connect_to_chat,
-        )
+        return f"<Chat access settings ({self.chat_id}) is {self.allow_connect_to_chat}>"
 
 
 class Connection(BASE):
     __tablename__ = "connection"
-    user_id = Column(Integer, primary_key=True)
+    user_id = Column(BigInteger, primary_key=True)
     chat_id = Column(String(14))
 
     def __init__(self, user_id, chat_id):
@@ -62,7 +64,7 @@ class Connection(BASE):
 
 class ConnectionHistory(BASE):
     __tablename__ = "connection_history"
-    user_id = Column(Integer, primary_key=True)
+    user_id = Column(BigInteger, primary_key=True)
     chat_id = Column(String(14), primary_key=True)
     chat_name = Column(UnicodeText)
     conn_time = Column(Integer)
@@ -74,7 +76,7 @@ class ConnectionHistory(BASE):
         self.conn_time = int(conn_time)
 
     def __repr__(self):
-        return "<connection user {} history {}>".format(self.user_id, self.chat_id)
+        return f"<connection user {self.user_id} history {self.chat_id}>"
 
 
 ChatAccessConnectionSettings.__table__.create(checkfirst=True)
@@ -90,8 +92,9 @@ HISTORY_CONNECT = {}
 
 def allow_connect_to_chat(chat_id: Union[str, int]) -> bool:
     try:
-        chat_setting = SESSION.query(ChatAccessConnectionSettings).get(str(chat_id))
-        if chat_setting:
+        if chat_setting := SESSION.query(ChatAccessConnectionSettings).get(
+            str(chat_id)
+        ):
             return chat_setting.allow_connect_to_chat
         return False
     finally:
@@ -111,10 +114,9 @@ def set_allow_connect_to_chat(chat_id: Union[int, str], setting: bool):
 
 def connect(user_id, chat_id):
     with CONNECTION_INSERTION_LOCK:
-        prev = SESSION.query(Connection).get((int(user_id)))
-        if prev:
+        if prev := SESSION.query(Connection).get(((user_id))):
             SESSION.delete(prev)
-        connect_to_chat = Connection(int(user_id), chat_id)
+        connect_to_chat = Connection((user_id), chat_id)
         SESSION.add(connect_to_chat)
         SESSION.commit()
         return True
@@ -122,7 +124,7 @@ def connect(user_id, chat_id):
 
 def get_connected_chat(user_id):
     try:
-        return SESSION.query(Connection).get((int(user_id)))
+        return SESSION.query(Connection).get(((user_id)))
     finally:
         SESSION.close()
 
@@ -136,8 +138,7 @@ def curr_connection(chat_id):
 
 def disconnect(user_id):
     with CONNECTION_INSERTION_LOCK:
-        disconnect = SESSION.query(Connection).get((int(user_id)))
-        if disconnect:
+        if disconnect := SESSION.query(Connection).get(((user_id))):
             SESSION.delete(disconnect)
             SESSION.commit()
             return True
@@ -146,69 +147,67 @@ def disconnect(user_id):
 
 
 def add_history_conn(user_id, chat_id, chat_name):
-    global HISTORY_CONNECT
     with CONNECTION_HISTORY_LOCK:
         conn_time = int(time.time())
-        if HISTORY_CONNECT.get(int(user_id)):
+        if HISTORY_CONNECT.get((user_id)):
             counting = (
                 SESSION.query(ConnectionHistory.user_id)
                 .filter(ConnectionHistory.user_id == str(user_id))
                 .count()
             )
             getchat_id = {
-                HISTORY_CONNECT[int(user_id)][x]["chat_id"]: x
-                for x in HISTORY_CONNECT[int(user_id)]
+                HISTORY_CONNECT[(user_id)][x]["chat_id"]: x
+                for x in HISTORY_CONNECT[(user_id)]
             }
 
             if chat_id in getchat_id:
                 todeltime = getchat_id[str(chat_id)]
-                delold = SESSION.query(ConnectionHistory).get(
-                    (int(user_id), str(chat_id)),
-                )
-                if delold:
+                if delold := SESSION.query(ConnectionHistory).get(
+                    ((user_id), str(chat_id)),
+                ):
                     SESSION.delete(delold)
-                    HISTORY_CONNECT[int(user_id)].pop(todeltime)
+                    HISTORY_CONNECT[(user_id)].pop(todeltime)
             elif counting >= 5:
-                todel = list(HISTORY_CONNECT[int(user_id)])
+                todel = list(HISTORY_CONNECT[(user_id)])
                 todel.reverse()
                 todel = todel[4:]
                 for x in todel:
-                    chat_old = HISTORY_CONNECT[int(user_id)][x]["chat_id"]
-                    delold = SESSION.query(ConnectionHistory).get(
-                        (int(user_id), str(chat_old)),
-                    )
-                    if delold:
+                    chat_old = HISTORY_CONNECT[(user_id)][x]["chat_id"]
+                    if delold := SESSION.query(ConnectionHistory).get(
+                        ((user_id), str(chat_old)),
+                    ):
                         SESSION.delete(delold)
-                        HISTORY_CONNECT[int(user_id)].pop(x)
+                        HISTORY_CONNECT[(user_id)].pop(x)
         else:
-            HISTORY_CONNECT[int(user_id)] = {}
-        delold = SESSION.query(ConnectionHistory).get((int(user_id), str(chat_id)))
-        if delold:
+            HISTORY_CONNECT[(user_id)] = {}
+        if delold := SESSION.query(ConnectionHistory).get(
+            ((user_id), str(chat_id))
+        ):
             SESSION.delete(delold)
-        history = ConnectionHistory(int(user_id), str(chat_id), chat_name, conn_time)
+        history = ConnectionHistory((user_id), str(chat_id), chat_name, conn_time)
         SESSION.add(history)
         SESSION.commit()
-        HISTORY_CONNECT[int(user_id)][conn_time] = {
+        HISTORY_CONNECT[(user_id)][conn_time] = {
             "chat_name": chat_name,
             "chat_id": str(chat_id),
         }
 
 
 def get_history_conn(user_id):
-    if not HISTORY_CONNECT.get(int(user_id)):
-        HISTORY_CONNECT[int(user_id)] = {}
-    return HISTORY_CONNECT[int(user_id)]
+    if not HISTORY_CONNECT.get((user_id)):
+        HISTORY_CONNECT[(user_id)] = {}
+    return HISTORY_CONNECT[(user_id)]
 
 
 def clear_history_conn(user_id):
-    global HISTORY_CONNECT
-    todel = list(HISTORY_CONNECT[int(user_id)])
+    todel = list(HISTORY_CONNECT[(user_id)])
     for x in todel:
-        chat_old = HISTORY_CONNECT[int(user_id)][x]["chat_id"]
-        delold = SESSION.query(ConnectionHistory).get((int(user_id), str(chat_old)))
-        if delold:
+        chat_old = HISTORY_CONNECT[(user_id)][x]["chat_id"]
+        if delold := SESSION.query(ConnectionHistory).get(
+            ((user_id), str(chat_old))
+        ):
             SESSION.delete(delold)
-            HISTORY_CONNECT[int(user_id)].pop(x)
+            HISTORY_CONNECT[(user_id)].pop(x)
     SESSION.commit()
     return True
 
